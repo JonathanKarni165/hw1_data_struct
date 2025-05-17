@@ -20,10 +20,19 @@ class AVLNode(object):
     def __init__(self, key, value: int):
         self.key = key
         self.value = value
-        self.left = None
-        self.right = None
-        self.parent = None
+        self.left: AVLNode = None
+        self.right: AVLNode = None
+        self.parent: AVLNode = None
         self.height = -1
+
+    def has_right(self):
+        return self.right is not None
+
+    def has_left(self):
+        return self.left is not None
+
+    def is_leaf(self):
+        return (not self.has_right()) and (not self.has_right())
 
     """returns whether self is not a virtual node
 
@@ -61,9 +70,9 @@ class AVLTree(object):
     def search(self, key):
         cur_node: AVLNode = self.root
         while cur_node is not None:
-            if cur_node.value == key:
+            if cur_node.key == key:
                 return cur_node
-            if cur_node.value < key:
+            if cur_node.key < key:
                 cur_node = cur_node.left
             else:
                 cur_node = cur_node.right
@@ -83,6 +92,57 @@ class AVLTree(object):
 
     def insert(self, key, val, start="root"):
         return -1
+
+    """
+    --helper method--
+	rotate tree right or left
+	@param root: the root of the sub tree (or the whole tree)
+		the sub tree has to have right or left child according to dir
+    @param dir: gets the char R or L
+    @param parent: parent node of root
+    @returns : the new root of the tree after changes
+			if the tree is not like expected the function returns None
+            if dir is neither R or L also return None
+	"""
+
+    def rotate(self, dir, root: AVLNode, parent: AVLNode = None):
+        #  rotate subtree left or right
+        if dir == 'R':
+            if root.left == None:
+                # TODO remove print when done
+                print('rotate: not the tree i expect')
+                return None
+
+            new_root: AVLNode = root.left
+            root.left = new_root.right
+            new_root.right = root
+
+        elif dir == 'L':
+            if root.right == None:
+                # TODO remove print when done
+                print('rotate: not the tree i expect')
+                return None
+
+            new_root: AVLNode = root.right
+            root.right = new_root.left
+            new_root.left = root
+
+        # reconnect parent
+        if parent == None:
+            return new_root
+
+        if parent.right == root:
+            parent.right = new_root
+        elif parent.left == root:
+            parent.left = new_root
+        else:
+            return None
+
+        return new_root
+
+    def insert_from_root(self, new_node):
+        new_key = new_node.key
+        cur_node: AVLNode = self.root
 
     """deletes node from the dictionary
 
