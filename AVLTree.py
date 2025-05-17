@@ -1,8 +1,8 @@
-# username - complete info
-# id1      - complete info
-# name1    - complete info
-# id2      - complete info
-# name2    - complete info
+# username - yonatankarni
+# id1      - 214411571
+# name1    - יונתן קרני
+# id2      - 214701344
+# name2    - שחר בן-דוד
 
 
 """A class represnting a node in an AVL tree"""
@@ -17,7 +17,7 @@ class AVLNode(object):
     @param value: data of your node
     """
 
-    def __init__(self, key, value: int):
+    def __init__(self, key=None, value=None, is_real=True):
         self.key = key
         self.value = value
         self.left: AVLNode = None
@@ -31,8 +31,14 @@ class AVLNode(object):
     def has_left(self):
         return self.left is not None
 
+    def has_parent(self):
+        return self.parent is not None
+
     def is_leaf(self):
-        return (not self.has_right()) and (not self.has_right())
+        return (not self.has_right()) and (not self.has_left())
+
+    def get_BF(self):
+        return self.left.height - self.right.height
 
     """returns whether self is not a virtual node
 
@@ -41,7 +47,60 @@ class AVLNode(object):
 	"""
 
     def is_real_node(self):
-        return False
+        return self.key == None
+
+    def display(self):
+        lines, *_ = self._display_aux()
+        for line in lines:
+            print(line)
+
+    def _display_aux(self):
+        """Returns list of strings, width, height, and horizontal coordinate of the root."""
+        # No child.
+        if self.right is None and self.left is None:
+            line = '%s' % self.key
+            width = len(line)
+            height = 1
+            middle = width // 2
+            return [line], width, height, middle
+
+        # Only left child.
+        if self.right is None:
+            lines, n, p, x = self.left._display_aux()
+            s = '%s' % self.key
+            u = len(s)
+            first_line = (x + 1) * ' ' + (n - x - 1) * '_' + s
+            second_line = x * ' ' + '/' + (n - x - 1 + u) * ' '
+            shifted_lines = [line + u * ' ' for line in lines]
+            return [first_line, second_line] + shifted_lines, n + u, p + 2, n + u // 2
+
+        # Only right child.
+        if self.left is None:
+            lines, n, p, x = self.right._display_aux()
+            s = '%s' % self.key
+            u = len(s)
+            first_line = s + x * '_' + (n - x) * ' '
+            second_line = (u + x) * ' ' + '\\' + (n - x - 1) * ' '
+            shifted_lines = [u * ' ' + line for line in lines]
+            return [first_line, second_line] + shifted_lines, n + u, p + 2, u // 2
+
+        # Two children.
+        left, n, p, x = self.left._display_aux()
+        right, m, q, y = self.right._display_aux()
+        s = '%s' % self.key
+        u = len(s)
+        first_line = (x + 1) * ' ' + (n - x - 1) * \
+            '_' + s + y * '_' + (m - y) * ' '
+        second_line = x * ' ' + '/' + \
+            (n - x - 1 + u + y) * ' ' + '\\' + (m - y - 1) * ' '
+        if p < q:
+            left += [n * ' '] * (q - p)
+        elif q < p:
+            right += [m * ' '] * (p - q)
+        zipped_lines = zip(left, right)
+        lines = [first_line, second_line] + \
+            [a + u * ' ' + b for a, b in zipped_lines]
+        return lines, n + m + u, max(p, q) + 2, n + u // 2
 
 
 """
@@ -56,9 +115,9 @@ class AVLTree(object):
 
     """
 
-    def __init__(self):
-        self.root = None
-
+    def __init__(self, root=None):
+        self.root = root
+        self.max = None
     """searches for a node in the dictionary corresponding to the key
 
 	@type key: int
@@ -68,15 +127,17 @@ class AVLTree(object):
 	"""
 
     def search(self, key):
+        '''
         cur_node: AVLNode = self.root
         while cur_node is not None:
             if cur_node.key == key:
                 return cur_node
             if cur_node.key < key:
-                cur_node = cur_node.left
-            else:
                 cur_node = cur_node.right
-        return None
+            else:
+                cur_node = cur_node.left
+        '''
+        return self.generic_search(self.root, key, True)
 
     """inserts a new node into the dictionary with corresponding key and value
 
@@ -91,7 +152,37 @@ class AVLTree(object):
 	"""
 
     def insert(self, key, val, start="root"):
-        return -1
+
+        new_node = self.init_new_real_node(key, val)
+        new_node.height = 0
+        if self.root == None:
+            self.root = new_node
+            self.max = new_node
+            return
+        # find where to insert
+        parent = None
+        if start == 'root':
+            parent = self.generic_search(self.root, key, False)
+        elif start == 'max':
+            parent = self.get_parent_to_insert_from_max(key)
+
+        if key < parent.key:
+            parent.left = new_node
+        else:
+            parent.right = new_node
+        new_node.parent = parent
+
+        if key > self.max.key:
+            self.max = new_node
+        # update height
+        cur_node = new_node
+        while cur_node.has_parent():
+            cur_node = cur_node.parent
+            cur_node.height = max(cur_node.left.height,
+                                  cur_node.right.height) + 1
+
+        # find errors and fix
+        return self.fix_tree(new_node)
 
     """
     --helper method--
@@ -105,44 +196,128 @@ class AVLTree(object):
             if dir is neither R or L also return None
 	"""
 
-    def rotate(self, dir, root: AVLNode, parent: AVLNode = None):
+    def rotate(self, dir, root: AVLNode):
+        self.root.display()
         #  rotate subtree left or right
         if dir == 'R':
-            if root.left == None:
+            if not root.has_left():
                 # TODO remove print when done
                 print('rotate: not the tree i expect')
                 return None
 
-            new_root: AVLNode = root.left
-            root.left = new_root.right
-            new_root.right = root
+            b: AVLNode = root
+            a: AVLNode = root.left
+            b.left = a.right
+            print(b.left.height)
+            if b.has_left():
+                b.left.parent = b
+            a.right = b
 
         elif dir == 'L':
-            if root.right == None:
+            if not root.has_right():
                 # TODO remove print when done
                 print('rotate: not the tree i expect')
                 return None
 
-            new_root: AVLNode = root.right
-            root.right = new_root.left
-            new_root.left = root
+            b: AVLNode = root
+            a: AVLNode = root.right
+            print(str(a.left.height), "ssssss")
+            b.right = a.left
+            print(b.right.height)
+            if b.has_right():
+                b.right.parent = b
+            a.left = b
 
-        # reconnect parent
-        if parent == None:
-            return new_root
+        a.parent = b.parent
+        if b != self.root:
+            if a.parent.right == b:
+                a.parent.right = a
+            else:
+                a.parent.left = a
 
-        if parent.right == root:
-            parent.right = new_root
-        elif parent.left == root:
-            parent.left = new_root
         else:
-            return None
+            self.root = a
+        b.parent = a
 
-        return new_root
+        b.height = max(b.left.height, b.right.height) + 1
+        a.height = max(a.left.height, a.right.height) + 1
+        self.root.display()
 
-    def insert_from_root(self, new_node):
-        new_key = new_node.key
-        cur_node: AVLNode = self.root
+        return a
+
+    """
+    --helper method--
+	return node if it in the tree and if not return where to insert it
+    @param new_node: new node to insert from max
+	"""
+
+    def generic_search(self, start, key, is_in_tree):
+        cur_node: AVLNode = start
+        prev_node: AVLNode = cur_node
+        while cur_node.key is not None:
+            if cur_node.key == key and is_in_tree:
+                return cur_node
+            prev_node = cur_node
+            if cur_node.key < key:
+                cur_node = cur_node.right
+            else:
+                cur_node = cur_node.left
+
+        if not is_in_tree:
+            return prev_node
+        return None
+
+    """
+    --helper method--
+	insert from max WITHOUT fixing tree
+    @param key
+	"""
+
+    def get_parent_to_insert_from_max(self, key: AVLNode):
+        cur_node: AVLNode = self.max
+
+        # go up until reaching parent of new node
+        while cur_node.has_parent() and key < cur_node.key:
+            cur_node = cur_node.parent
+        # insert from parent
+        return self.generic_search(cur_node, key, False)
+
+    """
+    --helper method--
+	find avl errors and fix with rotations 
+    @param start_node : position to start search for avl error
+	"""
+
+    def fix_tree(self, start_node: AVLNode):
+        count_rotations = 0
+        cur_node = start_node
+        while not cur_node is None:
+            print('node: ', cur_node.key,
+                  'with bf: ', cur_node.get_BF())
+            if cur_node.get_BF() == 2:
+                # left height is 1 -> rotate R
+                if cur_node.left.get_BF() == 1:
+                    self.rotate('R', cur_node)
+                    count_rotations += 1
+                # left height is -1 -> rotate LR
+                else:
+                    self.rotate('L', cur_node.left)
+                    self.rotate('R', cur_node)
+                    count_rotations += 2
+            if cur_node.get_BF() == -2:
+                print("ahhhhhhhhhhhhhh")
+                # left height is -1 -> rotate L
+                if cur_node.right.get_BF() == -1:
+                    self.rotate('L', cur_node)
+                    count_rotations += 1
+                # left height is 1 -> rotate RL
+                else:
+                    self.rotate('R', cur_node.right)
+                    self.rotate('L', cur_node)
+                    count_rotations += 2
+            cur_node = cur_node.parent
+
+        return count_rotations
 
     """deletes node from the dictionary
 
@@ -162,7 +337,19 @@ class AVLTree(object):
 	"""
 
     def avl_to_array(self):
-        return None
+        return self.rec_avl_to_array(self.root)
+
+    """
+    --helper method--
+	gets current node and creates the in-order array recursively
+    @param t: current node in the reccursion
+	"""
+
+    def rec_avl_to_array(self, t: AVLNode):
+        if t.key is None:
+            return []
+
+        return self.rec_avl_to_array(t.left) + [(t.key, t.value)] + self.rec_avl_to_array(t.right)
 
     """returns the number of items in dictionary
 
@@ -171,7 +358,7 @@ class AVLTree(object):
 	"""
 
     def size(self):
-        return -1
+        return len(self.avl_to_array(self.root))
 
     """returns the root of the tree representing the dictionary
 
@@ -180,9 +367,40 @@ class AVLTree(object):
 	"""
 
     def get_root(self):
-        return None
+        return self.root
 
     '''@returns: the number of nodes which have balance factor equals to 0 devided by the total number of nodes'''
 
     def get_amir_balance_factor(self):
-        return None
+        balance_array = [self.search(t[0]).get_BF() for t in self.avl_to_array]
+        zeros = balance_array.count(0)
+        if self.size > 0:
+            return zeros/self.size
+        return 1
+
+    def in_order(self):
+        self.rec_in_order(self.root)
+
+    def rec_in_order(self, t: AVLNode):
+        if t.key is not None:
+            self.rec_in_order(t.left)
+            print(t.key, ' height is: ', t.height)
+            self.rec_in_order(t.right)
+
+    def print_tree_2(self, node: AVLNode, level=0, label="Root"):
+        if node is not None:
+            self.print_tree(node.right, level + 1, "R")
+            print("    " * level + f"{label}: ({node.key}, {node.value})")
+            self.print_tree(node.left, level + 1, "L")
+
+    def init_new_real_node(self, key, value: int):
+        new_real_node = AVLNode(key, value)
+        left_ghost = AVLNode()
+        right_ghost = AVLNode()
+
+        new_real_node.right = right_ghost
+        new_real_node.left = left_ghost
+        right_ghost.parent = new_real_node
+        left_ghost.parent = new_real_node
+
+        return new_real_node
