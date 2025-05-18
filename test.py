@@ -53,18 +53,26 @@ tree.insert(65, 'blab')
 
 print('************************************\n\n')
 
-tree.in_order()
+tree.delete(tree.search(15))
 
-print(tree.avl_to_array())
+# print('************************************\n\n')
+# tree.delete(tree.search(7))
+
+print('************************************\n\n')
 
 
-def test_amir_balance_factor():
-     """Test Amir's balance factor."""
-     tree1 = AVLTree()
-     print(tree1.get_amir_balance_factor())
-     tree1.insert(10, "ten")
-     tree1.insert(20, "twenty")
-     tree1.insert(5, "five")
-     print(tree1.get_amir_balance_factor())
+#tree.in_order()
 
-test_amir_balance_factor()
+# print(tree.avl_to_array())
+
+
+# def test_amir_balance_factor():
+#      """Test Amir's balance factor."""
+#      tree1 = AVLTree()
+#      print(tree1.get_amir_balance_factor())
+#      tree1.insert(10, "ten")
+#      tree1.insert(20, "twenty")
+#      tree1.insert(5, "five")
+#      print(tree1.get_amir_balance_factor())
+
+# test_amir_balance_factor()
