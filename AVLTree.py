@@ -26,10 +26,10 @@ class AVLNode(object):
         self.height = -1
 
     def has_right(self):
-        return self.right is not None
+        return self.right.key is not None
 
     def has_left(self):
-        return self.left is not None
+        return self.left.key is not None
 
     def has_parent(self):
         return self.parent is not None
@@ -328,7 +328,89 @@ class AVLTree(object):
 	"""
 
     def delete(self, node):
+        """need to fix height and gilgoolim
+        
+        
+        """
+        if self.search(node.key) is None:
+            return 0
+        
+        if (node.has_left and not node.has_right) or (node.has_right and not node.has_left):
+            self.delete_with_one_son(node)
+
+        elif not node.has_left and not node.has_right:
+            self.delete_with_zero_sons(node)
+        
+        else:
+            succ_node = self.successor(node)
+            # succ cant be the root since node have 2 children
+
+            if (succ_node.has_left and not succ_node.has_right) or (succ_node.has_right and not succ_node.has_left):
+                self.delete_with_one_son(succ_node)
+                
+            elif not succ_node.has_left and not succ_node.has_right:
+                self.delete_with_zero_sons(succ_node)
+
+            succ_node.left = node.left
+            node.left.parent = succ_node
+
+            succ_node.right = node.right
+            node.right.parent = succ_node
+            succ_node.parent = node.parent
+
+
+            if self.root == node:
+                self.root = succ_node
+            
+            
+
+            
+
         return -1
+    
+
+
+    def delete_with_one_son(self, node: AVLNode):
+        if node.has_left and not node.has_right:
+            if node.parent is not None:
+                if node.parent.left == node:
+                    node.parent.left = node.left
+                    node.left.parent = node.parent
+                    # maybe change node to None???
+                elif node.parent.right == node:
+                    node.parent.right = node.left
+                    node.left.parent = node.parent
+                    # maybe change node to None???
+            else:
+                self.root = node.left
+                node.left.parent = None
+        
+        elif node.has_right and not node.has_left:
+            if node.parent is not None:
+                if node.parent.left == node:
+                    node.parent.left = node.right
+                    node.right.parent = node.parent
+                    # maybe change node to None???
+                elif node.parent.right == node:
+                    node.parent.right = node.right
+                    node.right.parent = node.parent
+                    # maybe change node to None???  
+            else:
+                self.root = node.right
+                node.right.parent = None
+
+
+
+    def delete_with_zero_sons(self, node: AVLNode):
+        if node.parent is not None:
+            if node.parent.left == node:
+                node.parent.left = node.left # ghost node
+            elif node.parent.right == node:
+                node.parent.right = node.right # ghost node
+        else:
+            self.root = None
+            
+
 
     """returns an array representing dictionary
 
@@ -337,6 +419,7 @@ class AVLTree(object):
 	"""
 
     def avl_to_array(self):
+        # print("pppppppppppp " + str(self.max.has_right()))
         return self.rec_avl_to_array(self.root)
 
     """
@@ -346,7 +429,7 @@ class AVLTree(object):
 	"""
 
     def rec_avl_to_array(self, t: AVLNode):
-        if t.key is None:
+        if t is None or t.key is None:
             return []
 
         return self.rec_avl_to_array(t.left) + [(t.key, t.value)] + self.rec_avl_to_array(t.right)
@@ -358,7 +441,7 @@ class AVLTree(object):
 	"""
 
     def size(self):
-        return len(self.avl_to_array(self.root))
+        return len(self.avl_to_array())
 
     """returns the root of the tree representing the dictionary
 
@@ -372,11 +455,11 @@ class AVLTree(object):
     '''@returns: the number of nodes which have balance factor equals to 0 devided by the total number of nodes'''
 
     def get_amir_balance_factor(self):
-        balance_array = [self.search(t[0]).get_BF() for t in self.avl_to_array]
+        balance_array = [self.search(t[0]).get_BF() for t in self.avl_to_array()]
         zeros = balance_array.count(0)
-        if self.size > 0:
-            return zeros/self.size
-        return 1
+        if self.size() > 0:
+            return zeros/self.size()
+        return 0
 
     def in_order(self):
         self.rec_in_order(self.root)
@@ -404,3 +487,16 @@ class AVLTree(object):
         left_ghost.parent = new_real_node
 
         return new_real_node
+    
+    def successor(self, node: AVLNode):
+        if node.right.key is not None:
+            ret = node.right
+            while ret.left.key is not None:
+                ret = ret.left.key
+        else:
+            ret = node
+            while ret.parent is not None and ret.parent.key < ret.key:
+                ret = ret.parent
+            if ret.parent is None:
+                ret = None
+        return ret
