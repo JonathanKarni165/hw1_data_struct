@@ -328,7 +328,136 @@ class AVLTree(object):
 	"""
 
     def delete(self, node):
-        return -1
+        """need to fix height and gilgoolim
+        
+        
+        """
+        if self.search(node.key) is None:
+            return 0
+        
+        if self.max == node:
+            self.max = node.parent
+        
+        if (node.has_left() and not node.has_right()) or (node.has_right() and not node.has_left()):
+            self.delete_with_one_son(node)
+
+            self.root.display()
+
+
+            cnt = self.fix_tree(node)
+
+
+        elif not node.has_left() and not node.has_right():
+            self.delete_with_zero_sons(node)
+
+            self.root.display()
+            
+            cnt = self.fix_tree(node)
+        
+        else:
+            succ_node = self.successor(node)
+            # succ cant be the root since node have 2 children
+
+            if (succ_node.has_left() and not succ_node.has_right()) or (succ_node.has_right() and not succ_node.has_left()):
+                self.delete_with_one_son(succ_node)
+                
+            elif not succ_node.has_left() and not succ_node.has_right():
+                self.delete_with_zero_sons(succ_node)
+
+
+            
+
+
+            succ_node.left = node.left
+            
+            if(node.left.key is not None):
+                node.left.parent = succ_node
+            
+            
+
+            succ_node.right = node.right
+            
+            if(node.right.key is not None):
+                node.right.parent = succ_node
+            succ_node.parent = node.parent
+
+
+            if not self.root == node:
+                if node.parent.left == node:
+                    node.parent.left = succ_node
+
+                elif node.parent.right == node:
+                    node.parent.right = succ_node
+
+            elif self.root == node:
+                self.root = succ_node
+            
+            self.root.display()
+            
+            cnt = self.fix_tree(succ_node)
+            
+        self.root.display()
+
+        return cnt
+    
+
+
+    def fix_height_0_sons(self, replacement: AVLNode, deleted: AVLNode):
+        replacement.height = max(replacement)
+
+
+    def fix_height_1_son(self, replacement: AVLNode, deleted: AVLNode):
+        replacement.height = max(replacement)
+
+    def fix_height_2_son(self, replacement: AVLNode, deleted: AVLNode):
+        replacement.height = max(replacement)
+        
+            
+
+    def delete_with_one_son(self, node: AVLNode):
+        if node.has_left() and not node.has_right():
+            if node.parent is not None:
+                if node.parent.left == node:
+                    node.parent.left = node.left
+                    node.left.parent = node.parent
+                    # maybe change node to None???
+                elif node.parent.right == node:
+                    node.parent.right = node.left
+                    node.left.parent = node.parent
+                    # maybe change node to None???
+            else:
+                self.root = node.left
+                node.left.parent = None
+        
+        elif node.has_right() and not node.has_left():
+            if node.parent is not None:
+                if node.parent.left == node:
+                    node.parent.left = node.right
+                    node.right.parent = node.parent
+                    # maybe change node to None???
+                elif node.parent.right == node:
+                    node.parent.right = node.right
+                    node.right.parent = node.parent
+                    # maybe change node to None???  
+            else:
+                self.root = node.right
+                node.right.parent = None
+                
+
+
+
+
+    def delete_with_zero_sons(self, node: AVLNode):
+        if node.parent is not None:
+            if node.parent.left == node:
+                node.parent.left = node.left # ghost node
+            elif node.parent.right == node:
+                node.parent.right = node.right # ghost node
+        else:
+            self.root = None
+        
+            
+
 
     """returns an array representing dictionary
 
