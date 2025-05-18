@@ -58,7 +58,7 @@ class AVLNode(object):
         """Returns list of strings, width, height, and horizontal coordinate of the root."""
         # No child.
         if self.right is None and self.left is None:
-            line = '%s' % self.key
+            line = f'{self.key}({self.height})'
             width = len(line)
             height = 1
             middle = width // 2
@@ -67,7 +67,7 @@ class AVLNode(object):
         # Only left child.
         if self.right is None:
             lines, n, p, x = self.left._display_aux()
-            s = '%s' % self.key
+            s = f'{self.key}({self.height})'
             u = len(s)
             first_line = (x + 1) * ' ' + (n - x - 1) * '_' + s
             second_line = x * ' ' + '/' + (n - x - 1 + u) * ' '
@@ -77,7 +77,7 @@ class AVLNode(object):
         # Only right child.
         if self.left is None:
             lines, n, p, x = self.right._display_aux()
-            s = '%s' % self.key
+            s = f'{self.key}({self.height})'
             u = len(s)
             first_line = s + x * '_' + (n - x) * ' '
             second_line = (u + x) * ' ' + '\\' + (n - x - 1) * ' '
@@ -87,7 +87,7 @@ class AVLNode(object):
         # Two children.
         left, n, p, x = self.left._display_aux()
         right, m, q, y = self.right._display_aux()
-        s = '%s' % self.key
+        s = f'{self.key}({self.height})'
         u = len(s)
         first_line = (x + 1) * ' ' + (n - x - 1) * \
             '_' + s + y * '_' + (m - y) * ' '
@@ -172,6 +172,7 @@ class AVLTree(object):
             parent.right = new_node
         new_node.parent = parent
 
+        
         if key > self.max.key:
             self.max = new_node
         # update height
@@ -180,7 +181,8 @@ class AVLTree(object):
             cur_node = cur_node.parent
             cur_node.height = max(cur_node.left.height,
                                   cur_node.right.height) + 1
-
+        print(f'\n****tree after inserting(without fix): {key}\n\n')
+        self.root.display()
         # find errors and fix
         return self.fix_tree(new_node)
 
@@ -195,8 +197,8 @@ class AVLTree(object):
 			if the tree is not like expected the function returns None
             if dir is neither R or L also return None
 	"""
-
     def rotate(self, dir, root: AVLNode):
+        print(f'\n****tree before fixing at: {root.key}\n')
         self.root.display()
         #  rotate subtree left or right
         if dir == 'R':
@@ -208,7 +210,7 @@ class AVLTree(object):
             b: AVLNode = root
             a: AVLNode = root.left
             b.left = a.right
-            print(b.left.height)
+            #print(b.left.height)
             if b.has_left():
                 b.left.parent = b
             a.right = b
@@ -221,9 +223,9 @@ class AVLTree(object):
 
             b: AVLNode = root
             a: AVLNode = root.right
-            print(str(a.left.height), "ssssss")
+            #print(str(a.left.height), "ssssss")
             b.right = a.left
-            print(b.right.height)
+            #print(b.right.height)
             if b.has_right():
                 b.right.parent = b
             a.left = b
@@ -241,6 +243,9 @@ class AVLTree(object):
 
         b.height = max(b.left.height, b.right.height) + 1
         a.height = max(a.left.height, a.right.height) + 1
+
+        self.update_height_up(a)
+        print(f'\n**** tree after fixing at: {root.key}\n')
         self.root.display()
 
         return a
@@ -292,8 +297,8 @@ class AVLTree(object):
         count_rotations = 0
         cur_node = start_node
         while not cur_node is None:
-            print('node: ', cur_node.key,
-                  'with bf: ', cur_node.get_BF())
+            #print('node: ', cur_node.key,
+             #     'with bf: ', cur_node.get_BF())
             if cur_node.get_BF() == 2:
                 # left height is 1 -> rotate R
                 if cur_node.left.get_BF() == 1:
@@ -305,7 +310,7 @@ class AVLTree(object):
                     self.rotate('R', cur_node)
                     count_rotations += 2
             if cur_node.get_BF() == -2:
-                print("ahhhhhhhhhhhhhh")
+                #print("ahhhhhhhhhhhhhh")
                 # left height is -1 -> rotate L
                 if cur_node.right.get_BF() == -1:
                     self.rotate('L', cur_node)
@@ -336,23 +341,38 @@ class AVLTree(object):
             return 0
         
         if self.max == node:
-            self.max = node.parent
+
+            if not self.root.has_right():
+                if not self.root.has_left():
+                    self.root = None
+                    self.max = None
+                else:
+                    new_max: AVLNode = node.left
+                    while new_max.has_right():
+                        new_max = new_max.right
+                    self.max = new_max
+            else:
+                self.max = node.parent
         
         if (node.has_left() and not node.has_right()) or (node.has_right() and not node.has_left()):
             self.delete_with_one_son(node)
+            self.update_height_up(node.parent)
+
 
             self.root.display()
 
 
-            cnt = self.fix_tree(node)
+            cnt = self.fix_tree(node.parent)
 
 
         elif not node.has_left() and not node.has_right():
             self.delete_with_zero_sons(node)
 
+            self.update_height_up(node.parent)
+
             self.root.display()
             
-            cnt = self.fix_tree(node)
+            cnt = self.fix_tree(node.parent)
         
         else:
             succ_node = self.successor(node)
@@ -360,14 +380,27 @@ class AVLTree(object):
 
             if (succ_node.has_left() and not succ_node.has_right()) or (succ_node.has_right() and not succ_node.has_left()):
                 self.delete_with_one_son(succ_node)
+
+                self.update_height_up(succ_node)
+
+                succ_node.height = node.height
+
+                self.update_height_up(node.parent)
                 
             elif not succ_node.has_left() and not succ_node.has_right():
                 self.delete_with_zero_sons(succ_node)
 
+                self.update_height_up(succ_node)
+                succ_node.height = node.height
+                
+                self.update_height_up(node.parent)
+
 
             
-
-
+            
+            temp = succ_node.parent # succ can't be the root so it has a parent
+            if temp.key == node.key:
+                temp = succ_node
             succ_node.left = node.left
             
             if(node.left.key is not None):
@@ -394,25 +427,14 @@ class AVLTree(object):
             
             self.root.display()
             
-            cnt = self.fix_tree(succ_node)
+            cnt = self.fix_tree(temp)
             
         self.root.display()
 
         return cnt
     
 
-
-    def fix_height_0_sons(self, replacement: AVLNode, deleted: AVLNode):
-        replacement.height = max(replacement)
-
-
-    def fix_height_1_son(self, replacement: AVLNode, deleted: AVLNode):
-        replacement.height = max(replacement)
-
-    def fix_height_2_son(self, replacement: AVLNode, deleted: AVLNode):
-        replacement.height = max(replacement)
-        
-            
+     
 
     def delete_with_one_son(self, node: AVLNode):
         if node.has_left() and not node.has_right():
@@ -466,7 +488,7 @@ class AVLTree(object):
 	"""
 
     def avl_to_array(self):
-        # print("pppppppppppp " + str(self.max.has_right()))
+        
         return self.rec_avl_to_array(self.root)
 
     """
@@ -537,13 +559,29 @@ class AVLTree(object):
     
     def successor(self, node: AVLNode):
         if node.right.key is not None:
+
             ret = node.right
-            while ret.left.key is not None:
-                ret = ret.left.key
+            while ret.has_left():
+                ret = ret.left
         else:
             ret = node
-            while ret.parent is not None and ret.parent.key < ret.key:
+            while (ret.parent is not None) and ret.parent.key < ret.key:
                 ret = ret.parent
-            if ret.parent is None:
+            if ret.has_parent():
+                if ret.parent.left == ret:
+                    ret = ret.parent
+            elif ret.parent is None:
                 ret = None
         return ret
+    
+
+    '''
+    gets node that changed heght and update parents accordingly
+    @param node: node that changes its height
+    '''
+    def update_height_up(self,node:AVLNode):
+        if node == None:
+            return
+        while node is not None:
+            node.height = max(node.left.height, node.right.height) + 1
+            node = node.parent

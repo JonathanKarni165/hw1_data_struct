@@ -1,0 +1,37 @@
+import AVLTree
+from AVLTree import AVLNode
+from AVLTree import AVLTree
+
+tree = AVLTree()
+print(tree.avl_to_array())
+print(tree.size())
+tree.insert(7, 'hi')
+
+print('************************************\n\n')
+tree.insert(2, "he")
+
+print('************************************\n\n')
+tree.insert(16, "hu")
+
+
+
+print('************************************\n\n')
+tree.insert(15, 'blabla')
+
+print('************************************\n\n')
+tree.insert(3, 'kaaa')
+
+print('************************************\n\n')
+tree.insert(20, 'blab')
+
+
+
+print('************************************\n\n')
+
+tree.delete(tree.search(2))
+
+print('************************************\n\n')
+tree.delete(tree.search(3))
+
+print('************************************\n\n')
+
