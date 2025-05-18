@@ -402,6 +402,18 @@ class AVLTree(object):
     
 
 
+    def fix_height_0_sons(self, replacement: AVLNode, deleted: AVLNode):
+        replacement.height = max(replacement)
+
+
+    def fix_height_1_son(self, replacement: AVLNode, deleted: AVLNode):
+        replacement.height = max(replacement)
+
+    def fix_height_2_son(self, replacement: AVLNode, deleted: AVLNode):
+        replacement.height = max(replacement)
+        
+            
+
     def delete_with_one_son(self, node: AVLNode):
         if node.has_left() and not node.has_right():
             if node.parent is not None:
