@@ -181,8 +181,8 @@ class AVLTree(object):
             cur_node = cur_node.parent
             cur_node.height = max(cur_node.left.height,
                                   cur_node.right.height) + 1
-        print(f'\n****tree after inserting(without fix): {key}\n\n')
-        self.root.display()
+        #print(f'\n****tree after inserting(without fix): {key}\n\n')
+        #self.root.display()
         # find errors and fix
         return self.fix_tree(new_node)
 
@@ -198,8 +198,8 @@ class AVLTree(object):
             if dir is neither R or L also return None
 	"""
     def rotate(self, dir, root: AVLNode):
-        print(f'\n****tree before fixing at: {root.key}\n')
-        self.root.display()
+        #print(f'\n****tree before fixing at: {root.key}\n')
+        #self.root.display()
         #  rotate subtree left or right
         if dir == 'R':
             if not root.has_left():
@@ -245,8 +245,8 @@ class AVLTree(object):
         a.height = max(a.left.height, a.right.height) + 1
 
         self.update_height_up(a)
-        print(f'\n**** tree after fixing at: {root.key}\n')
-        self.root.display()
+        #print(f'\n**** tree after fixing at: {root.key}\n')
+        #self.root.display()
 
         return a
 
@@ -359,7 +359,7 @@ class AVLTree(object):
             self.update_height_up(node.parent)
 
 
-            self.root.display()
+            #self.root.display()
 
 
             cnt = self.fix_tree(node.parent)
@@ -370,7 +370,7 @@ class AVLTree(object):
 
             self.update_height_up(node.parent)
 
-            self.root.display()
+            #self.root.display()
             
             cnt = self.fix_tree(node.parent)
         
@@ -425,11 +425,11 @@ class AVLTree(object):
             elif self.root == node:
                 self.root = succ_node
             
-            self.root.display()
+            #self.root.display()
             
             cnt = self.fix_tree(temp)
             
-        self.root.display()
+        #self.root.display()
 
         return cnt
     
