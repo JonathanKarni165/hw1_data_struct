@@ -26,6 +26,8 @@ root.right.right.parent = root.right
 root.right.right.height = 0
 '''
 tree = AVLTree()
+print(tree.avl_to_array())
+print(tree.size())
 tree.insert(5, 'hi', 'max')
 
 print('************************************\n\n')
@@ -54,3 +56,15 @@ print('************************************\n\n')
 tree.in_order()
 
 print(tree.avl_to_array())
+
+
+def test_amir_balance_factor():
+     """Test Amir's balance factor."""
+     tree1 = AVLTree()
+     print(tree1.get_amir_balance_factor())
+     tree1.insert(10, "ten")
+     tree1.insert(20, "twenty")
+     tree1.insert(5, "five")
+     print(tree1.get_amir_balance_factor())
+
+test_amir_balance_factor()
