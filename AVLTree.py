@@ -26,10 +26,10 @@ class AVLNode(object):
         self.height = -1
 
     def has_right(self):
-        return self.right is not None
+        return self.right.key is not None
 
     def has_left(self):
-        return self.left is not None
+        return self.left.key is not None
 
     def has_parent(self):
         return self.parent is not None
@@ -58,7 +58,7 @@ class AVLNode(object):
         """Returns list of strings, width, height, and horizontal coordinate of the root."""
         # No child.
         if self.right is None and self.left is None:
-            line = f'{self.key}({self.height})'
+            line = '%s' % self.key
             width = len(line)
             height = 1
             middle = width // 2
@@ -67,7 +67,7 @@ class AVLNode(object):
         # Only left child.
         if self.right is None:
             lines, n, p, x = self.left._display_aux()
-            s = f'{self.key}({self.height})'
+            s = '%s' % self.key
             u = len(s)
             first_line = (x + 1) * ' ' + (n - x - 1) * '_' + s
             second_line = x * ' ' + '/' + (n - x - 1 + u) * ' '
@@ -77,7 +77,7 @@ class AVLNode(object):
         # Only right child.
         if self.left is None:
             lines, n, p, x = self.right._display_aux()
-            s = f'{self.key}({self.height})'
+            s = '%s' % self.key
             u = len(s)
             first_line = s + x * '_' + (n - x) * ' '
             second_line = (u + x) * ' ' + '\\' + (n - x - 1) * ' '
@@ -87,7 +87,7 @@ class AVLNode(object):
         # Two children.
         left, n, p, x = self.left._display_aux()
         right, m, q, y = self.right._display_aux()
-        s = f'{self.key}({self.height})'
+        s = '%s' % self.key
         u = len(s)
         first_line = (x + 1) * ' ' + (n - x - 1) * \
             '_' + s + y * '_' + (m - y) * ' '
@@ -466,6 +466,7 @@ class AVLTree(object):
 	"""
 
     def avl_to_array(self):
+        # print("pppppppppppp " + str(self.max.has_right()))
         return self.rec_avl_to_array(self.root)
 
     """
@@ -475,7 +476,7 @@ class AVLTree(object):
 	"""
 
     def rec_avl_to_array(self, t: AVLNode):
-        if t.key is None:
+        if t is None or t.key is None:
             return []
 
         return self.rec_avl_to_array(t.left) + [(t.key, t.value)] + self.rec_avl_to_array(t.right)
@@ -487,7 +488,7 @@ class AVLTree(object):
 	"""
 
     def size(self):
-        return len(self.avl_to_array(self.root))
+        return len(self.avl_to_array())
 
     """returns the root of the tree representing the dictionary
 
@@ -501,11 +502,11 @@ class AVLTree(object):
     '''@returns: the number of nodes which have balance factor equals to 0 devided by the total number of nodes'''
 
     def get_amir_balance_factor(self):
-        balance_array = [self.search(t[0]).get_BF() for t in self.avl_to_array]
+        balance_array = [self.search(t[0]).get_BF() for t in self.avl_to_array()]
         zeros = balance_array.count(0)
-        if self.size > 0:
-            return zeros/self.size
-        return 1
+        if self.size() > 0:
+            return zeros/self.size()
+        return 0
 
     def in_order(self):
         self.rec_in_order(self.root)
@@ -533,3 +534,16 @@ class AVLTree(object):
         left_ghost.parent = new_real_node
 
         return new_real_node
+    
+    def successor(self, node: AVLNode):
+        if node.right.key is not None:
+            ret = node.right
+            while ret.left.key is not None:
+                ret = ret.left.key
+        else:
+            ret = node
+            while ret.parent is not None and ret.parent.key < ret.key:
+                ret = ret.parent
+            if ret.parent is None:
+                ret = None
+        return ret
