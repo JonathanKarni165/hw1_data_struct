@@ -197,6 +197,7 @@ class AVLTree(object):
 	"""
 
     def rotate(self, dir, root: AVLNode):
+        print(f'\nbefor fix at {root.key}\n')
         self.root.display()
         #  rotate subtree left or right
         if dir == 'R':
@@ -208,7 +209,7 @@ class AVLTree(object):
             b: AVLNode = root
             a: AVLNode = root.left
             b.left = a.right
-            print(b.left.height)
+            #print(b.left.height)
             if b.has_left():
                 b.left.parent = b
             a.right = b
@@ -221,9 +222,9 @@ class AVLTree(object):
 
             b: AVLNode = root
             a: AVLNode = root.right
-            print(str(a.left.height), "ssssss")
+            #print(str(a.left.height), "ssssss")
             b.right = a.left
-            print(b.right.height)
+            #print(b.right.height)
             if b.has_right():
                 b.right.parent = b
             a.left = b
@@ -241,7 +242,9 @@ class AVLTree(object):
 
         b.height = max(b.left.height, b.right.height) + 1
         a.height = max(a.left.height, a.right.height) + 1
+        print(f'\nafter fix at {root.key}\n')
         self.root.display()
+        
 
         return a
 
@@ -292,8 +295,8 @@ class AVLTree(object):
         count_rotations = 0
         cur_node = start_node
         while not cur_node is None:
-            print('node: ', cur_node.key,
-                  'with bf: ', cur_node.get_BF())
+            #print('node: ', cur_node.key,
+            #      'with bf: ', cur_node.get_BF())
             if cur_node.get_BF() == 2:
                 # left height is 1 -> rotate R
                 if cur_node.left.get_BF() == 1:
@@ -305,7 +308,7 @@ class AVLTree(object):
                     self.rotate('R', cur_node)
                     count_rotations += 2
             if cur_node.get_BF() == -2:
-                print("ahhhhhhhhhhhhhh")
+                #print("ahhhhhhhhhhhhhh")
                 # left height is -1 -> rotate L
                 if cur_node.right.get_BF() == -1:
                     self.rotate('L', cur_node)
@@ -341,7 +344,7 @@ class AVLTree(object):
         if (node.has_left() and not node.has_right()) or (node.has_right() and not node.has_left()):
             self.delete_with_one_son(node)
 
-            self.root.display()
+            #self.root.display()
 
 
             cnt = self.fix_tree(node)
@@ -350,7 +353,7 @@ class AVLTree(object):
         elif not node.has_left() and not node.has_right():
             self.delete_with_zero_sons(node)
 
-            self.root.display()
+            #self.root.display()
             
             cnt = self.fix_tree(node)
         
@@ -392,11 +395,11 @@ class AVLTree(object):
             elif self.root == node:
                 self.root = succ_node
             
-            self.root.display()
+            #self.root.display()
             
             cnt = self.fix_tree(succ_node)
             
-        self.root.display()
+        #self.root.display()
 
         return cnt
     
