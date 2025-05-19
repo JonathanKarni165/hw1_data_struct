@@ -571,7 +571,7 @@ class AVLTree(object):
 class BST(AVLTree):
     def __init__(self, root=None):
         super().__init__(root)
-    def insert(self, key, val, start="root"):
+    def insert_naive(self, key, val, start="root"):
         new_node = self.init_new_real_node(key, val)
         new_node.height = 0
         if self.root == None:

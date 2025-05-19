@@ -1,10 +1,17 @@
 from AVLTree import AVLTree
-tree = AVLTree()
+
+from AVLTree import BST
+tree = BST()
 while True:
     print('\n\n')
-    print('what to do? \ninsert : i \ndelete : d \ninsert_max : im \nprint_tree : p \nsize : s \nmax : m \namir_balance : a \navl_array : ar')
+    print('what to do? \ninsert : i \ndelete : d \ninsert_max : im \nprint_tree : p \nsize : s \nmax : m \namir_balance : a \navl_array : ar \ninsert_bst : in')
     command = input()
     
+    if command == 'in':
+        print('what key to insert?')
+        key = int(input())
+        tree.insert_naive(key, str(key))
+
     if command == 'i':
         print('what key to insert?')
         key = int(input())
