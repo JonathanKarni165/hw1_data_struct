@@ -566,3 +566,31 @@ class AVLTree(object):
         while node is not None:
             node.height = max(node.left.height, node.right.height) + 1
             node = node.parent
+
+
+class BST(AVLTree):
+    def __init__(self, root=None):
+        super().__init__(root)
+    def insert(self, key, val, start="root"):
+        new_node = self.init_new_real_node(key, val)
+        new_node.height = 0
+        if self.root == None:
+            self.root = new_node
+            self.max = new_node
+            return
+        # find where to insert
+        parent = None
+        if start == 'root':
+            parent = self.generic_search(self.root, key, False)
+        elif start == 'max':
+            parent = self.get_parent_to_insert_from_max(key)
+
+        if key < parent.key:
+            parent.left = new_node
+        else:
+            parent.right = new_node
+        new_node.parent = parent
+
+        
+        if key > self.max.key:
+            self.max = new_node
