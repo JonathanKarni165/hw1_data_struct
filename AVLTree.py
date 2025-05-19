@@ -118,6 +118,27 @@ class AVLTree(object):
     def __init__(self, root=None):
         self.root = root
         self.max = None
+    
+
+
+    '''
+    initialize new node with two ghost nodes
+    @param key
+    @param value
+    @return the new real node
+    '''
+    def init_new_real_node(self, key, value: int):
+        new_real_node = AVLNode(key, value)
+        left_ghost = AVLNode()
+        right_ghost = AVLNode()
+
+        new_real_node.right = right_ghost
+        new_real_node.left = left_ghost
+        right_ghost.parent = new_real_node
+        left_ghost.parent = new_real_node
+
+        return new_real_node
+    
     """searches for a node in the dictionary corresponding to the key
 
 	@type key: int
@@ -125,20 +146,31 @@ class AVLTree(object):
 	@rtype: AVLNode
 	@returns: node corresponding to key
 	"""
-
     def search(self, key):
-        '''
-        cur_node: AVLNode = self.root
-        while cur_node is not None:
-            if cur_node.key == key:
+        return self.generic_search(self.root, key, True)
+
+    """
+    --helper method--
+	return node if it in the tree and if not return where to insert it
+    @param new_node: new node to insert from max
+	"""
+
+    def generic_search(self, start, key, is_in_tree):
+        cur_node: AVLNode = start
+        prev_node: AVLNode = cur_node
+        while cur_node.key is not None:
+            if cur_node.key == key and is_in_tree:
                 return cur_node
+            prev_node = cur_node
             if cur_node.key < key:
                 cur_node = cur_node.right
             else:
                 cur_node = cur_node.left
-        '''
-        return self.generic_search(self.root, key, True)
 
+        if not is_in_tree:
+            return prev_node
+        return None
+    
     """inserts a new node into the dictionary with corresponding key and value
 
 	@type key: int
@@ -181,8 +213,7 @@ class AVLTree(object):
             cur_node = cur_node.parent
             cur_node.height = max(cur_node.left.height,
                                   cur_node.right.height) + 1
-        #print(f'\n****tree after inserting(without fix): {key}\n\n')
-        #self.root.display()
+        
         # find errors and fix
         return self.fix_tree(new_node)
 
@@ -198,34 +229,25 @@ class AVLTree(object):
             if dir is neither R or L also return None
 	"""
     def rotate(self, dir, root: AVLNode):
-        #print(f'\n****tree before fixing at: {root.key}\n')
-        #self.root.display()
         #  rotate subtree left or right
         if dir == 'R':
             if not root.has_left():
-                # TODO remove print when done
-                print('rotate: not the tree i expect')
                 return None
 
             b: AVLNode = root
             a: AVLNode = root.left
             b.left = a.right
-            #print(b.left.height)
             if b.has_left():
                 b.left.parent = b
             a.right = b
 
         elif dir == 'L':
             if not root.has_right():
-                # TODO remove print when done
-                print('rotate: not the tree i expect')
                 return None
 
             b: AVLNode = root
             a: AVLNode = root.right
-            #print(str(a.left.height), "ssssss")
             b.right = a.left
-            #print(b.right.height)
             if b.has_right():
                 b.right.parent = b
             a.left = b
@@ -245,37 +267,17 @@ class AVLTree(object):
         a.height = max(a.left.height, a.right.height) + 1
 
         self.update_height_up(a)
-        #print(f'\n**** tree after fixing at: {root.key}\n')
-        #self.root.display()
 
         return a
 
-    """
-    --helper method--
-	return node if it in the tree and if not return where to insert it
-    @param new_node: new node to insert from max
-	"""
-
-    def generic_search(self, start, key, is_in_tree):
-        cur_node: AVLNode = start
-        prev_node: AVLNode = cur_node
-        while cur_node.key is not None:
-            if cur_node.key == key and is_in_tree:
-                return cur_node
-            prev_node = cur_node
-            if cur_node.key < key:
-                cur_node = cur_node.right
-            else:
-                cur_node = cur_node.left
-
-        if not is_in_tree:
-            return prev_node
-        return None
+    
 
     """
     --helper method--
-	insert from max WITHOUT fixing tree
-    @param key
+    find where to insert new key starting from max
+	@param key
+    @returns parent of node to be add
+    *the function does not add the node to tree
 	"""
 
     def get_parent_to_insert_from_max(self, key: AVLNode):
@@ -292,13 +294,10 @@ class AVLTree(object):
 	find avl errors and fix with rotations 
     @param start_node : position to start search for avl error
 	"""
-
     def fix_tree(self, start_node: AVLNode):
         count_rotations = 0
         cur_node = start_node
         while not cur_node is None:
-            #print('node: ', cur_node.key,
-             #     'with bf: ', cur_node.get_BF())
             if cur_node.get_BF() == 2:
                 # left height is 1 -> rotate R
                 if cur_node.left.get_BF() == 1:
@@ -310,7 +309,6 @@ class AVLTree(object):
                     self.rotate('R', cur_node)
                     count_rotations += 2
             if cur_node.get_BF() == -2:
-                #print("ahhhhhhhhhhhhhh")
                 # left height is -1 -> rotate L
                 if cur_node.right.get_BF() == -1:
                     self.rotate('L', cur_node)
@@ -333,10 +331,6 @@ class AVLTree(object):
 	"""
 
     def delete(self, node):
-        """need to fix height and gilgoolim
-        
-        
-        """
         if self.search(node.key) is None:
             return 0
         
@@ -434,7 +428,12 @@ class AVLTree(object):
         return cnt
     
 
-     
+    '''
+    --helper method--
+    gets node with one son and deletes it from tree
+    @param node: AVLnode that needs to be deleted
+    
+    '''
 
     def delete_with_one_son(self, node: AVLNode):
         if node.has_left() and not node.has_right():
@@ -467,7 +466,12 @@ class AVLTree(object):
                 
 
 
-
+    '''
+    --helper method--
+    gets node with zero sons and deletes it from tree
+    @param node: AVLnode that needs to be deleted
+    
+    '''
 
     def delete_with_zero_sons(self, node: AVLNode):
         if node.parent is not None:
@@ -479,16 +483,13 @@ class AVLTree(object):
             self.root = None
         
             
-
-
-    """returns an array representing dictionary
-
+    """
+    returns an array representing dictionary
 	@rtype: list
 	@returns: a sorted list according to key of touples (key, value) representing the data structure
 	"""
 
     def avl_to_array(self):
-        
         return self.rec_avl_to_array(self.root)
 
     """
@@ -496,33 +497,32 @@ class AVLTree(object):
 	gets current node and creates the in-order array recursively
     @param t: current node in the reccursion
 	"""
-
     def rec_avl_to_array(self, t: AVLNode):
         if t is None or t.key is None:
             return []
 
         return self.rec_avl_to_array(t.left) + [(t.key, t.value)] + self.rec_avl_to_array(t.right)
 
-    """returns the number of items in dictionary
-
+    """
+    returns the number of items in dictionary
 	@rtype: int
 	@returns: the number of items in dictionary
 	"""
-
     def size(self):
         return len(self.avl_to_array())
 
-    """returns the root of the tree representing the dictionary
+    """
+    returns the root of the tree representing the dictionary
 
 	@rtype: AVLNode
 	@returns: the root, None if the dictionary is empty
 	"""
-
     def get_root(self):
         return self.root
 
-    '''@returns: the number of nodes which have balance factor equals to 0 devided by the total number of nodes'''
-
+    '''
+    @returns: the number of nodes which have balance factor equals to 0 devided by the total number of nodes
+    '''
     def get_amir_balance_factor(self):
         balance_array = [self.search(t[0]).get_BF() for t in self.avl_to_array()]
         zeros = balance_array.count(0)
@@ -530,33 +530,14 @@ class AVLTree(object):
             return zeros/self.size()
         return 0
 
-    def in_order(self):
-        self.rec_in_order(self.root)
-
-    def rec_in_order(self, t: AVLNode):
-        if t.key is not None:
-            self.rec_in_order(t.left)
-            print(t.key, ' height is: ', t.height)
-            self.rec_in_order(t.right)
-
-    def print_tree_2(self, node: AVLNode, level=0, label="Root"):
-        if node is not None:
-            self.print_tree(node.right, level + 1, "R")
-            print("    " * level + f"{label}: ({node.key}, {node.value})")
-            self.print_tree(node.left, level + 1, "L")
-
-    def init_new_real_node(self, key, value: int):
-        new_real_node = AVLNode(key, value)
-        left_ghost = AVLNode()
-        right_ghost = AVLNode()
-
-        new_real_node.right = right_ghost
-        new_real_node.left = left_ghost
-        right_ghost.parent = new_real_node
-        left_ghost.parent = new_real_node
-
-        return new_real_node
     
+
+    '''
+    --helper method--
+    gets node and returns a pointer to its successor
+    (if the node is the max then returns None)
+
+    '''
     def successor(self, node: AVLNode):
         if node.right.key is not None:
 
