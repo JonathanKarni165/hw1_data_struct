@@ -20,6 +20,7 @@ def bst_root_sorted(n):
     
     sorted_arr = tree_sort_root.avl_to_array()
     stop = time.time()
+    print(sorted_arr)
 
     return stop - start
 
@@ -40,6 +41,7 @@ def bst_max_sorted(n):
     
 
     stop = time.time()
+    print(sorted_arr)
     
     return stop-start
 
@@ -57,6 +59,7 @@ def bst_root_reverse(n):
     
     sorted_arr = tree_unsort_root.avl_to_array()
     stop = time.time()
+    print(sorted_arr)
     return stop - start
 
 
@@ -73,6 +76,7 @@ def bst_max_reverse(n):
     
     sorted_arr = tree_unsort_max.avl_to_array()
     stop = time.time()
+    print(sorted_arr)
     return stop-start
 
 
@@ -90,6 +94,7 @@ def avl_root_sorted(n):
     
     sorted_arr = tree_sort_root.avl_to_array()
     stop = time.time()
+    print(sorted_arr)
     return stop - start
 
 
@@ -107,7 +112,7 @@ def avl_max_sorted(n):
     
     sorted_arr = tree_sort_max.avl_to_array()
     stop = time.time()
-    
+    print(sorted_arr)
     return stop-start
 
 
@@ -123,6 +128,7 @@ def avl_root_reverse(n):
     
     sorted_arr = tree_unsort_root.avl_to_array()
     stop = time.time()
+    print(sorted_arr)
     return stop - start
 
 
@@ -137,6 +143,7 @@ def avl_max_reverse(n):
         tree_unsort_max.insert(insert_seq2[i], str(i),'max')
     sorted_arr = tree_unsort_max.avl_to_array() 
     stop = time.time()
+    print(sorted_arr)
     return stop-start
 
 
