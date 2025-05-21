@@ -24,6 +24,8 @@ class AVLNode(object):
         self.right: AVLNode = None
         self.parent: AVLNode = None
         self.height = -1
+        self.size_subtree = 0
+        self.balanced_in_subtree = 0
 
     def has_right(self):
         return self.right.key is not None
@@ -58,7 +60,7 @@ class AVLNode(object):
         """Returns list of strings, width, height, and horizontal coordinate of the root."""
         # No child.
         if self.right is None and self.left is None:
-            line = f'{self.key}({self.height})'
+            line = f'{self.key}({self.height})({self.size_subtree})({self.balanced_in_subtree})'
             width = len(line)
             height = 1
             middle = width // 2
@@ -67,7 +69,7 @@ class AVLNode(object):
         # Only left child.
         if self.right is None:
             lines, n, p, x = self.left._display_aux()
-            s = f'{self.key}({self.height})'
+            s = f'{self.key}({self.height})({self.size_subtree})({self.balanced_in_subtree})'
             u = len(s)
             first_line = (x + 1) * ' ' + (n - x - 1) * '_' + s
             second_line = x * ' ' + '/' + (n - x - 1 + u) * ' '
@@ -77,7 +79,7 @@ class AVLNode(object):
         # Only right child.
         if self.left is None:
             lines, n, p, x = self.right._display_aux()
-            s = f'{self.key}({self.height})'
+            s = f'{self.key}({self.height})({self.size_subtree})({self.balanced_in_subtree})'
             u = len(s)
             first_line = s + x * '_' + (n - x) * ' '
             second_line = (u + x) * ' ' + '\\' + (n - x - 1) * ' '
@@ -87,7 +89,7 @@ class AVLNode(object):
         # Two children.
         left, n, p, x = self.left._display_aux()
         right, m, q, y = self.right._display_aux()
-        s = f'{self.key}({self.height})'
+        s = f'{self.key}({self.height})({self.size_subtree})({self.balanced_in_subtree})'
         u = len(s)
         first_line = (x + 1) * ' ' + (n - x - 1) * \
             '_' + s + y * '_' + (m - y) * ' '
@@ -187,6 +189,13 @@ class AVLTree(object):
 
         new_node = self.init_new_real_node(key, val)
         new_node.height = 0
+
+
+        new_node.size_subtree = 1
+
+        new_node.balanced_in_subtree = 1
+
+
         if self.root == None:
             self.root = new_node
             self.max = new_node
@@ -213,6 +222,10 @@ class AVLTree(object):
             cur_node = cur_node.parent
             cur_node.height = max(cur_node.left.height,
                                   cur_node.right.height) + 1
+            
+            cur_node.size_subtree = cur_node.left.size_subtree + cur_node.right.size_subtree + 1
+
+            cur_node.balanced_in_subtree = cur_node.left.balanced_in_subtree + cur_node.right.balanced_in_subtree + (cur_node.get_BF() == 0)
         
         # find errors and fix
         return self.fix_tree(new_node)
@@ -236,6 +249,17 @@ class AVLTree(object):
 
             b: AVLNode = root
             a: AVLNode = root.left
+
+
+            a.size_subtree = b.size_subtree
+            b.size_subtree = a.right.size_subtree + b.right.size_subtree + 1
+
+
+
+            b.balanced_in_subtree = a.right.balanced_in_subtree + b.right.balanced_in_subtree + (a.right.height - b.right.height == 0)
+            a.balanced_in_subtree = a.left.balanced_in_subtree + b.balanced_in_subtree + (a.left.height - 1 - max(a.right.height, b.right.height) == 0)
+
+
             b.left = a.right
             if b.has_left():
                 b.left.parent = b
@@ -247,6 +271,20 @@ class AVLTree(object):
 
             b: AVLNode = root
             a: AVLNode = root.right
+
+
+
+            a.size_subtree = b.size_subtree
+            b.size_subtree = a.left.size_subtree + b.left.size_subtree + 1
+
+
+
+            b.balanced_in_subtree = a.left.balanced_in_subtree + b.left.balanced_in_subtree + (a.left.height - b.left.height == 0)
+            a.balanced_in_subtree = a.right.balanced_in_subtree + b.balanced_in_subtree + (a.right.height - 1 - max(a.left.height, b.left.height) == 0)
+
+
+
+
             b.right = a.left
             if b.has_right():
                 b.right.parent = b
@@ -369,7 +407,7 @@ class AVLTree(object):
             cnt = self.fix_tree(node.parent)
         
         else:
-            succ_node = self.successor(node)
+            succ_node: AVLNode = self.successor(node)
             # succ cant be the root since node have 2 children
 
             if (succ_node.has_left() and not succ_node.has_right()) or (succ_node.has_right() and not succ_node.has_left()):
@@ -378,6 +416,15 @@ class AVLTree(object):
                 self.update_height_up(succ_node)
 
                 succ_node.height = node.height
+                
+
+
+                succ_node.size_subtree = node.size_subtree
+
+
+                succ_node.balanced_in_subtree = node.balanced_in_subtree
+
+
 
                 self.update_height_up(node.parent)
                 
@@ -386,6 +433,16 @@ class AVLTree(object):
 
                 self.update_height_up(succ_node)
                 succ_node.height = node.height
+
+
+
+                succ_node.size_subtree = node.size_subtree
+
+
+                succ_node.balanced_in_subtree = node.balanced_in_subtree
+
+
+
                 
                 self.update_height_up(node.parent)
 
@@ -509,7 +566,9 @@ class AVLTree(object):
 	@returns: the number of items in dictionary
 	"""
     def size(self):
-        return len(self.avl_to_array())
+        if self.root is not None:
+            return self.root.size_subtree
+        return 0
 
     """
     returns the root of the tree representing the dictionary
@@ -524,10 +583,8 @@ class AVLTree(object):
     @returns: the number of nodes which have balance factor equals to 0 devided by the total number of nodes
     '''
     def get_amir_balance_factor(self):
-        balance_array = [self.search(t[0]).get_BF() for t in self.avl_to_array()]
-        zeros = balance_array.count(0)
         if self.size() > 0:
-            return zeros/self.size()
+            return self.root.balanced_in_subtree/self.root.size_subtree
         return 0
 
     
@@ -557,12 +614,18 @@ class AVLTree(object):
     
 
     '''
-    gets node that changed heght and update parents accordingly
-    @param node: node that changes its height
+    gets node that changed height, size_subtree or balanced_in_subtree and update parents accordingly
+    @param node: node that changes its height, size_subtree or balanced_in_subtree
     '''
     def update_height_up(self,node:AVLNode):
         if node == None:
             return
         while node is not None:
             node.height = max(node.left.height, node.right.height) + 1
+
+            node.size_subtree = node.left.size_subtree + node.right.size_subtree + 1
+
+
+            node.balanced_in_subtree = node.left.balanced_in_subtree + node.right.balanced_in_subtree + (node.get_BF() == 0)
+
             node = node.parent
