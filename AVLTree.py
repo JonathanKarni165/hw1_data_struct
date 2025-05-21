@@ -199,7 +199,7 @@ class AVLTree(object):
         if self.root == None:
             self.root = new_node
             self.max = new_node
-            return
+            return 0
         # find where to insert
         parent = None
         if start == 'root':
