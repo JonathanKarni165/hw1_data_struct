@@ -20,7 +20,7 @@ while True:
     if command == 'im':
         print('what key to insert?')
         key = int(input())
-        tree.insert(key, str(key)+'fm', 'max')
+        print(tree.insert(key, str(key)+'fm', 'max'))
     
     if command == 'd':
         print('what key to delete?')

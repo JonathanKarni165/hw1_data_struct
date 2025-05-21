@@ -3,7 +3,6 @@ from csv import writer
 from random import shuffle
 from AVLTree import BST
 from AVLTree import AVLTree
-
 from itertools import permutations
 
 
@@ -161,36 +160,78 @@ check = {}
 #         check[a] = l[i]
 #         print(a)
 #
-
-while len(check) < 40:
-    lst = list(range(60))
+'''
+while len(check) < 10:
+    lst = list(range(10))
     shuffle(lst)
     num = countOff(lst)
     if len(set(range(num-9, num+10)).intersection(set(check.keys()))) == 0:
         check[num] = lst
-        print(num)
+
+print(check)
+'''
+
+def flip_series(lst):
+    yield lst
+    for i in range(len(lst)):
+        for j in range(len(lst)-i-1):
+            tmp = lst[j+1]
+            lst[j+1] = lst[j]
+            lst[j] = tmp
+            yield lst
+    
+
+def avl_max(lst):
+    tree_max = AVLTree()
+
+    start = time.time()
+    total_rotation_num = 0
+    for n in lst:
+        total_rotation_num +=tree_max.insert(n,f'{n}','max')
+    sorted_arr = tree_max.avl_to_array()
+
+    stop = time.time()
+    return total_rotation_num
 
 
-myKeys = list(check.keys())
-myKeys.sort()
-check = {i: check[i] for i in myKeys}
+#myKeys = list(check.keys())
+#myKeys.sort()
+#check = {i: check[i] for i in myKeys}
 
+# 1234
+# 2134
+# 2314
+# 2341
 # Open our existing CSV file in append mode
 # Create a file object for this file
+N=100
+I_NUM = (N*(N-1))//2
+print(avl_max([list(range(15))]))
 with open('exp1.csv', 'a') as exp_file:
     # Pass this file object to csv.writer()
     # and get a writer object
     writer_object = writer(exp_file)
 
-    # Pass the list as an argument into
-    # the writerow()
-    # writer_object.writerow(List)
-    for n in range(len(check)):
-        row = [0 for i in range(2)]
-        func_lst = [avl_max_sorted]
-        row[0] = list(check.keys())[n]
-        row[1] = round(func_lst[0](check[list(check.keys())[n]]), 10)
-        writer_object.writerow(row)
+    gen1 = flip_series(list(range(N)))
+    gen2 = flip_series([0,1,3,2] + list(range(4,N)))
+    gen3 = flip_series([0,1,2,4,3] + list(range(5,N)))
+    # {(I=5 : (65, 8)}
+    dict_I = {key:[0,0] for key in range(0,I_NUM+1)}
+    for (g1,g2,g3) in zip(gen1,gen2,gen3):
+        print(g1,'\n\n',g2,'\n\n',g3,'\n\n')
+        dict_I[countOff(g1)][0]+=1
+        dict_I[countOff(g1)][1]+=avl_max(g1)
+
+        dict_I[countOff(g2)][0]+=1
+        dict_I[countOff(g2)][1]+=avl_max(g2)
+
+        dict_I[countOff(g3)][0]+=1
+        dict_I[countOff(g3)][1]+=avl_max(g2)
+    for i in range(len(dict_I)):
+        writer_object.writerow([i,dict_I[i][1]/dict_I[i][0]])
+
+    
+    
     # Close the file object
     exp_file.close()
 
