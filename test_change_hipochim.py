@@ -117,7 +117,7 @@ def avl_max_sorted(lst):
     sorted_arr = tree_sort_max.avl_to_array()
     stop = time.time()
     print(sorted_arr)
-    return (stop - start)*(10**6)
+    return (stop - start)
 
 
 def avl_root_reverse(lst):
@@ -188,10 +188,10 @@ def avl_max(lst):
     total_rotation_num = 0
     for n in lst:
         total_rotation_num +=tree_max.insert(n,f'{n}','max')
-    sorted_arr = tree_max.avl_to_array()
+    # sorted_arr = tree_max.avl_to_array()
 
     stop = time.time()
-    return total_rotation_num
+    return stop-start
 
 
 #myKeys = list(check.keys())
@@ -204,7 +204,7 @@ def avl_max(lst):
 # 2341
 # Open our existing CSV file in append mode
 # Create a file object for this file
-N=100
+N=20
 I_NUM = (N*(N-1))//2
 print(avl_max([list(range(15))]))
 with open('exp1.csv', 'a') as exp_file:

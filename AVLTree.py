@@ -213,19 +213,24 @@ class AVLTree(object):
         if key > self.max.key:
             self.max = new_node
         # update height
-        cur_node = new_node
-        while cur_node.has_parent():
-            cur_node = cur_node.parent
-            cur_node.height = max(cur_node.left.height,
-                                  cur_node.right.height) + 1
 
-            cur_node.size_subtree = cur_node.left.size_subtree + cur_node.right.size_subtree + 1
 
-            cur_node.balanced_in_subtree = cur_node.left.balanced_in_subtree + cur_node.right.balanced_in_subtree + (
-                        cur_node.get_BF() == 0)
+        # cur_node = new_node
+        # while cur_node.has_parent():
+        #     cur_node = cur_node.parent
+        #     cur_node.height = max(cur_node.left.height,
+        #                           cur_node.right.height) + 1
+
+        #     cur_node.size_subtree = cur_node.left.size_subtree + cur_node.right.size_subtree + 1
+
+        #     cur_node.balanced_in_subtree = cur_node.left.balanced_in_subtree + cur_node.right.balanced_in_subtree + (
+        #                 cur_node.get_BF() == 0)
+
+        unchanged, changed_height = self.update_height_up(new_node.parent)
+        
 
         # find errors and fix
-        return self.fix_tree(new_node)
+        return self.fix_tree(new_node, unchanged, changed_height)
 
     """
     --helper method--
@@ -322,33 +327,50 @@ class AVLTree(object):
     @param start_node : position to start search for avl error
 	"""
 
-    def fix_tree(self, start_node: AVLNode):
+    def fix_tree(self, start_node, stop_at: AVLNode, changed_height):
+        after_stop = False
         count_rotations = 0
         cur_node = start_node
         while not cur_node is None:
-            if cur_node.get_BF() == 2:
-                # left height is 1 -> rotate R
-                if cur_node.left.get_BF() == 1:
-                    self.rotate('R', cur_node)
-                    count_rotations += 1
-                # left height is -1 -> rotate LR
-                else:
-                    self.rotate('L', cur_node.left)
-                    self.rotate('R', cur_node)
-                    count_rotations += 2
-            if cur_node.get_BF() == -2:
-                # left height is -1 -> rotate L
-                if cur_node.right.get_BF() == -1:
-                    self.rotate('L', cur_node)
-                    count_rotations += 1
-                # left height is 1 -> rotate RL
-                else:
-                    self.rotate('R', cur_node.right)
-                    self.rotate('L', cur_node)
-                    count_rotations += 2
-            cur_node = cur_node.parent
 
-        return count_rotations
+            cur_BF = cur_node.get_BF()
+            
+            if cur_node == stop_at:
+                after_stop = True
+            
+            if abs(cur_BF) < 2 and after_stop:
+                break
+
+
+            elif abs(cur_BF) < 2 and not after_stop:
+                cur_node = cur_node.parent
+
+            else:
+
+
+                if cur_BF == 2:
+                    # left height is 1 -> rotate R
+                    if cur_node.left.get_BF() == 1:
+                        self.rotate('R', cur_node)
+                        count_rotations += 1
+                    # left height is -1 -> rotate LR
+                    else:
+                        self.rotate('L', cur_node.left)
+                        self.rotate('R', cur_node)
+                        count_rotations += 2
+                if cur_BF == -2:
+                    # left height is -1 -> rotate L
+                    if cur_node.right.get_BF() == -1:
+                        self.rotate('L', cur_node)
+                        count_rotations += 1
+                    # left height is 1 -> rotate RL
+                    else:
+                        self.rotate('R', cur_node.right)
+                        self.rotate('L', cur_node)
+                        count_rotations += 2
+                cur_node = cur_node.parent
+
+        return count_rotations + changed_height
 
     """deletes node from the dictionary
 
@@ -359,9 +381,8 @@ class AVLTree(object):
 	"""
 
     def delete(self, node):
-        if self.search(node.key) is None:
-            return 0
 
+        
         if self.max == node:
 
             if not self.root.has_right():
@@ -378,21 +399,21 @@ class AVLTree(object):
 
         if (node.has_left() and not node.has_right()) or (node.has_right() and not node.has_left()):
             self.delete_with_one_son(node)
-            self.update_height_up(node.parent)
+            unchanged, changed_height = self.update_height_up(node.parent)
 
             # self.root.display()
 
-            cnt = self.fix_tree(node.parent)
+            cnt = self.fix_tree(node.parent, unchanged, changed_height)
 
 
         elif not node.has_left() and not node.has_right():
             self.delete_with_zero_sons(node)
 
-            self.update_height_up(node.parent)
+            unchanged, changed_height = self.update_height_up(node.parent)
 
             # self.root.display()
 
-            cnt = self.fix_tree(node.parent)
+            cnt = self.fix_tree(node.parent, unchanged, changed_height)
 
         else:
             succ_node: AVLNode = self.successor(node)
@@ -402,27 +423,39 @@ class AVLTree(object):
                     succ_node.has_right() and not succ_node.has_left()):
                 self.delete_with_one_son(succ_node)
 
-                self.update_height_up(succ_node)
+                unchanged, changed_height = self.update_height_up(succ_node)
 
                 succ_node.height = node.height
+                
+
+
+                changed_height += 1
+
+
 
                 succ_node.size_subtree = node.size_subtree
 
                 succ_node.balanced_in_subtree = node.balanced_in_subtree
 
-                self.update_height_up(node.parent)
+                # self.update_height_up(node.parent)
 
             elif not succ_node.has_left() and not succ_node.has_right():
                 self.delete_with_zero_sons(succ_node)
 
-                self.update_height_up(succ_node)
+                unchanged, changed_height = self.update_height_up(succ_node)
                 succ_node.height = node.height
+
+
+
+                changed_height += 1
+
+
 
                 succ_node.size_subtree = node.size_subtree
 
                 succ_node.balanced_in_subtree = node.balanced_in_subtree
 
-                self.update_height_up(node.parent)
+                # self.update_height_up(node.parent)
 
             temp = succ_node.parent  # succ can't be the root so it has a parent
             if temp.key == node.key:
@@ -450,7 +483,7 @@ class AVLTree(object):
 
             # self.root.display()
 
-            cnt = self.fix_tree(temp)
+            cnt = self.fix_tree(temp, unchanged, changed_height)
 
         # self.root.display()
 
@@ -526,7 +559,7 @@ class AVLTree(object):
     def rec_avl_to_array(self, t: AVLNode):
         if t is None or t.key is None:
             return []
-
+    
         return self.rec_avl_to_array(t.left) + [(t.key, t.value)] + self.rec_avl_to_array(t.right)
 
     """
@@ -586,13 +619,27 @@ class AVLTree(object):
     '''
     gets node that changed height, size_subtree or balanced_in_subtree and update parents accordingly
     @param node: node that changes its height, size_subtree or balanced_in_subtree
+    @returns: pointer to the first node whose height doesn't change (return None if all the possible changes happen)
     '''
 
     def update_height_up(self, node: AVLNode):
+        check = True
+        num_of_changes = 0
+        ret = None
         if node == None:
-            return
+            return None
         while node is not None:
-            node.height = max(node.left.height, node.right.height) + 1
+
+            tmp = max(node.left.height, node.right.height) + 1
+
+            if tmp != node.height:
+                node.height = tmp
+                num_of_changes += 1
+            else:
+                if check:
+                    ret = node
+                    check = False
+
 
             node.size_subtree = node.left.size_subtree + node.right.size_subtree + 1
 
@@ -600,6 +647,7 @@ class AVLTree(object):
                         node.get_BF() == 0)
 
             node = node.parent
+        return ret, num_of_changes
 
 
 class BST(AVLTree):

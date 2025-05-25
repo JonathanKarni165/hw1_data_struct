@@ -15,8 +15,8 @@ while True:
     if command == 'i':
         print('what key to insert?')
         key = int(input())
-        tree.insert(key, str(key))
-
+        print(tree.insert(key, str(key)))
+        
     if command == 'im':
         print('what key to insert?')
         key = int(input())
@@ -25,7 +25,7 @@ while True:
     if command == 'd':
         print('what key to delete?')
         key = int(input())
-        tree.delete(tree.search(key))
+        print(tree.delete(tree.search(key)))
     
     if command == 'm':
         print(tree.max.key)

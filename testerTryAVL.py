@@ -20,7 +20,7 @@ def bst_root_sorted(n):
     
     sorted_arr = tree_sort_root.avl_to_array()
     stop = time.time()
-    print(sorted_arr)
+    # print(sorted_arr)
 
     return stop - start
 
@@ -41,7 +41,7 @@ def bst_max_sorted(n):
     
 
     stop = time.time()
-    print(sorted_arr)
+    # print(sorted_arr)
     
     return stop-start
 
@@ -59,7 +59,7 @@ def bst_root_reverse(n):
     
     sorted_arr = tree_unsort_root.avl_to_array()
     stop = time.time()
-    print(sorted_arr)
+    # print(sorted_arr)
     return stop - start
 
 
@@ -76,7 +76,7 @@ def bst_max_reverse(n):
     
     sorted_arr = tree_unsort_max.avl_to_array()
     stop = time.time()
-    print(sorted_arr)
+    # print(sorted_arr)
     return stop-start
 
 
@@ -94,7 +94,7 @@ def avl_root_sorted(n):
     
     sorted_arr = tree_sort_root.avl_to_array()
     stop = time.time()
-    print(sorted_arr)
+    # print(sorted_arr)
     return stop - start
 
 
@@ -112,7 +112,7 @@ def avl_max_sorted(n):
     
     sorted_arr = tree_sort_max.avl_to_array()
     stop = time.time()
-    print(sorted_arr)
+    # print(sorted_arr)
     return stop-start
 
 
@@ -128,7 +128,7 @@ def avl_root_reverse(n):
     
     sorted_arr = tree_unsort_root.avl_to_array()
     stop = time.time()
-    print(sorted_arr)
+    # print(sorted_arr)
     return stop - start
 
 
@@ -143,7 +143,7 @@ def avl_max_reverse(n):
         tree_unsort_max.insert(insert_seq2[i], str(i),'max')
     sorted_arr = tree_unsort_max.avl_to_array() 
     stop = time.time()
-    print(sorted_arr)
+    # print(sorted_arr)
     return stop-start
 
 
@@ -161,11 +161,14 @@ with open('exp.csv', 'a') as exp_file:
     # the writerow()
     # writer_object.writerow(List)
 
-    for n in range(100,1000,100):
+    lst = [100, 500, 2500, 5000, 10000, 15000]
+    for n in range(len(lst)):
+        print("start " + str(lst[n]))
         row = [0 for i in range(8)]
         func_lst = [bst_root_sorted, bst_max_sorted, bst_root_reverse, bst_max_reverse, avl_root_sorted, avl_max_sorted, avl_root_reverse, avl_max_reverse]
         for i in range(8):
-            row[i] = round(func_lst[i](n), 10)
+            row[i] = round(func_lst[i](lst[n]), 10)
         writer_object.writerow(row)
     # Close the file object
     exp_file.close()
+    print("finished")
