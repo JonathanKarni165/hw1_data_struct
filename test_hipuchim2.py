@@ -35,7 +35,7 @@ def avl_max(lst):
     for n in lst:
         total_rotation_num +=tree_max.insert(n,f'{n}','max')
     # sorted_arr = tree_max.avl_to_array()
-
+    sorted_arr = tree_max.avl_to_array()
     stop = time.time()
     return stop-start
 
@@ -52,30 +52,21 @@ def avl_max(lst):
 # Create a file object for this file
 N=20
 I_NUM = (N*(N-1))//2
-x=[]
-y=[]
-print(avl_max([list(range(15))]))
+point_list=[]
+ins_seq = list(range(N))
+cnt_x = 0
+while cnt_x < 100:
+    shuffle(ins_seq)
+    x = countOff(ins_seq)
+    y = avl_max(ins_seq)
+    if x not in [p[0] for p in point_list]:
+        point_list.append((x,y))
+        cnt_x +=1
 
-
-gen1 = flip_series(list(range(N)))
-gen2 = flip_series([0,1,3,2] + list(range(4,N)))
-gen3 = flip_series([0,1,2,4,3] + list(range(5,N)))
-# {(I=5 : (65, 8)}
-dict_I = {key:[0,0] for key in range(0,I_NUM+1)}
-for (g1,g2,g3) in zip(gen1,gen2,gen3):
-    print(g1,'\n\n',g2,'\n\n',g3,'\n\n')
-    dict_I[countOff(g1)][0]+=1
-    dict_I[countOff(g1)][1]+=avl_max(g1)
-
-    dict_I[countOff(g2)][0]+=1
-    dict_I[countOff(g2)][1]+=avl_max(g2)
-
-    dict_I[countOff(g3)][0]+=1
-    dict_I[countOff(g3)][1]+=avl_max(g2)
-for i in range(len(dict_I)):
-    x.append(i)
-    y.append(dict_I[i][1]/dict_I[i][0])
-
-
-plt.plot(x,y)
+point_list.sort()
+x_list = [p[0] for p in point_list]
+y_list = [p[1] for p in point_list]
+print(x_list)
+print(y_list)
+plt.plot(x_list,y_list)
 plt.show()

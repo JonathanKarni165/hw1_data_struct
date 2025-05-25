@@ -332,7 +332,6 @@ class AVLTree(object):
         count_rotations = 0
         cur_node = start_node
         while not cur_node is None:
-            print('\nfixtree_node: ',cur_node.key)
             if is_insert and count_rotations !=0:
                 break
 
