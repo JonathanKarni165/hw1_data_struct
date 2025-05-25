@@ -1,0 +1,23 @@
+import matplotlib.pyplot as plt
+
+# Data
+x = [1, 2, 3, 4, 5]
+y1 = [1, 4, 9, 16, 25]
+y2 = [2, 3, 5, 7, 11]
+y3 = [5, 7, 6, 3, 1]
+
+# Plotting
+plt.plot(x, y1, color='blue', label='y = x^2')
+plt.plot(x, y2, color='green', label='Prime numbers')
+plt.plot(x, y3, color='red', label='Random data')
+
+# Legend (מקרא)
+plt.legend()
+
+# Titles and labels
+plt.title('Multiple Graphs Example')
+plt.xlabel('X Axis')
+plt.ylabel('Y Axis')
+
+# Show plot
+plt.show()

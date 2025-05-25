@@ -49,7 +49,7 @@ class AVLNode(object):
 	"""
 
     def is_real_node(self):
-        return self.key == None
+        return self.key != None
 
     def display(self):
         lines, *_ = self._display_aux()
@@ -230,7 +230,7 @@ class AVLTree(object):
         
 
         # find errors and fix
-        return self.fix_tree(new_node, unchanged, changed_height)
+        return self.fix_tree(new_node, unchanged, changed_height, True)
 
     """
     --helper method--
@@ -327,11 +327,14 @@ class AVLTree(object):
     @param start_node : position to start search for avl error
 	"""
 
-    def fix_tree(self, start_node, stop_at: AVLNode, changed_height):
+    def fix_tree(self, start_node, stop_at: AVLNode, changed_height, is_insert=False):
         after_stop = False
         count_rotations = 0
         cur_node = start_node
         while not cur_node is None:
+            print('\nfixtree_node: ',cur_node.key)
+            if is_insert and count_rotations !=0:
+                break
 
             cur_BF = cur_node.get_BF()
             
@@ -426,13 +429,8 @@ class AVLTree(object):
                 unchanged, changed_height = self.update_height_up(succ_node)
 
                 succ_node.height = node.height
-                
 
-
-                changed_height += 1
-
-
-
+                changed_height += 1               
                 succ_node.size_subtree = node.size_subtree
 
                 succ_node.balanced_in_subtree = node.balanced_in_subtree
@@ -444,12 +442,7 @@ class AVLTree(object):
 
                 unchanged, changed_height = self.update_height_up(succ_node)
                 succ_node.height = node.height
-
-
-
-                changed_height += 1
-
-
+                changed_height += 1               
 
                 succ_node.size_subtree = node.size_subtree
 
@@ -548,7 +541,18 @@ class AVLTree(object):
 	"""
 
     def avl_to_array(self):
-        return self.rec_avl_to_array(self.root)
+        out_arr = []
+        stck = []
+        cur : AVLNode= self.root
+        while cur.is_real_node() or len(stck)>0:
+            if cur.is_real_node():
+                stck.append(cur)
+                cur = cur.left
+            else:
+                cur = stck.pop()
+                out_arr += [(cur.key,cur.value)]
+                cur = cur.right
+        return out_arr
 
     """
     --helper method--
