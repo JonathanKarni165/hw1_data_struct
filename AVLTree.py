@@ -7,7 +7,6 @@
 
 """A class represnting a node in an AVL tree"""
 
-
 class AVLNode(object):
     """Constructor, you are allowed to add more fields.
 
@@ -51,71 +50,15 @@ class AVLNode(object):
     def is_real_node(self):
         return self.key != None
 
-    def display(self):
-        lines, *_ = self._display_aux()
-        for line in lines:
-            print(line)
-
-    def _display_aux(self):
-        """Returns list of strings, width, height, and horizontal coordinate of the root."""
-        # No child.
-        if self.right is None and self.left is None:
-            line = f'{self.key}({self.height})({self.size_subtree})({self.balanced_in_subtree})'
-            width = len(line)
-            height = 1
-            middle = width // 2
-            return [line], width, height, middle
-
-        # Only left child.
-        if self.right is None:
-            lines, n, p, x = self.left._display_aux()
-            s = f'{self.key}({self.height})({self.size_subtree})({self.balanced_in_subtree})'
-            u = len(s)
-            first_line = (x + 1) * ' ' + (n - x - 1) * '_' + s
-            second_line = x * ' ' + '/' + (n - x - 1 + u) * ' '
-            shifted_lines = [line + u * ' ' for line in lines]
-            return [first_line, second_line] + shifted_lines, n + u, p + 2, n + u // 2
-
-        # Only right child.
-        if self.left is None:
-            lines, n, p, x = self.right._display_aux()
-            s = f'{self.key}({self.height})({self.size_subtree})({self.balanced_in_subtree})'
-            u = len(s)
-            first_line = s + x * '_' + (n - x) * ' '
-            second_line = (u + x) * ' ' + '\\' + (n - x - 1) * ' '
-            shifted_lines = [u * ' ' + line for line in lines]
-            return [first_line, second_line] + shifted_lines, n + u, p + 2, u // 2
-
-        # Two children.
-        left, n, p, x = self.left._display_aux()
-        right, m, q, y = self.right._display_aux()
-        s = f'{self.key}({self.height})({self.size_subtree})({self.balanced_in_subtree})'
-        u = len(s)
-        first_line = (x + 1) * ' ' + (n - x - 1) * \
-                     '_' + s + y * '_' + (m - y) * ' '
-        second_line = x * ' ' + '/' + \
-                      (n - x - 1 + u + y) * ' ' + '\\' + (m - y - 1) * ' '
-        if p < q:
-            left += [n * ' '] * (q - p)
-        elif q < p:
-            right += [m * ' '] * (p - q)
-        zipped_lines = zip(left, right)
-        lines = [first_line, second_line] + \
-                [a + u * ' ' + b for a, b in zipped_lines]
-        return lines, n + m + u, max(p, q) + 2, n + u // 2
-
 
 """
 A class implementing an AVL tree.
 """
 
-
 class AVLTree(object):
     """
     Constructor, you are allowed to add more fields.
-
     """
-
     def __init__(self, root=None):
         self.root = root
         self.max = None
@@ -126,7 +69,6 @@ class AVLTree(object):
     @param value
     @return the new real node
     '''
-
     def init_new_real_node(self, key, value: int):
         new_real_node = AVLNode(key, value)
         left_ghost = AVLNode()
@@ -212,20 +154,7 @@ class AVLTree(object):
 
         if key > self.max.key:
             self.max = new_node
-        # update height
-
-
-        # cur_node = new_node
-        # while cur_node.has_parent():
-        #     cur_node = cur_node.parent
-        #     cur_node.height = max(cur_node.left.height,
-        #                           cur_node.right.height) + 1
-
-        #     cur_node.size_subtree = cur_node.left.size_subtree + cur_node.right.size_subtree + 1
-
-        #     cur_node.balanced_in_subtree = cur_node.left.balanced_in_subtree + cur_node.right.balanced_in_subtree + (
-        #                 cur_node.get_BF() == 0)
-
+        
         unchanged, changed_height = self.update_height_up(new_node.parent)
         
 
@@ -325,6 +254,7 @@ class AVLTree(object):
     --helper method--
 	find avl errors and fix with rotations 
     @param start_node : position to start search for avl error
+    @return number of height changes
 	"""
 
     def fix_tree(self, start_node, stop_at: AVLNode, changed_height, is_insert=False):
@@ -381,10 +311,7 @@ class AVLTree(object):
 	@rtype: int
 	@returns: the number of rebalancing operation due to AVL rebalancing
 	"""
-
     def delete(self, node):
-
-        
         if self.max == node:
 
             if not self.root.has_right():
@@ -487,7 +414,6 @@ class AVLTree(object):
     @param node: AVLnode that needs to be deleted
 
     '''
-
     def delete_with_one_son(self, node: AVLNode):
         if node.has_left() and not node.has_right():
             if node.parent is not None:
@@ -554,18 +480,6 @@ class AVLTree(object):
         return out_arr
 
     """
-    --helper method--
-	gets current node and creates the in-order array recursively
-    @param t: current node in the reccursion
-	"""
-
-    def rec_avl_to_array(self, t: AVLNode):
-        if t is None or t.key is None:
-            return []
-    
-        return self.rec_avl_to_array(t.left) + [(t.key, t.value)] + self.rec_avl_to_array(t.right)
-
-    """
     returns the number of items in dictionary
 	@rtype: int
 	@returns: the number of items in dictionary
@@ -630,7 +544,7 @@ class AVLTree(object):
         num_of_changes = 0
         ret = None
         if node == None:
-            return None
+            return (None,0)
         while node is not None:
 
             tmp = max(node.left.height, node.right.height) + 1
@@ -651,31 +565,3 @@ class AVLTree(object):
 
             node = node.parent
         return ret, num_of_changes
-
-
-class BST(AVLTree):
-    def __init__(self, root=None):
-        super().__init__(root)
-    def insert_naive(self, key, val, start="root"):
-        new_node = self.init_new_real_node(key, val)
-        new_node.height = 0
-        if self.root == None:
-            self.root = new_node
-            self.max = new_node
-            return
-        # find where to insert
-        parent = None
-        if start == 'root':
-            parent = self.generic_search(self.root, key, False)
-        elif start == 'max':
-            parent = self.get_parent_to_insert_from_max(key)
-
-        if key < parent.key:
-            parent.left = new_node
-        else:
-            parent.right = new_node
-        new_node.parent = parent
-
-        
-        if key > self.max.key:
-            self.max = new_node
